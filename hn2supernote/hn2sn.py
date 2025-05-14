@@ -58,7 +58,7 @@ def scrape(url):
             raise ValueError("Article text too short, might be paywalled")
             
         log(f"Successfully scraped article: {art.title}")
-        return f"<h1>{art.title}</h1>{art.text.replace('\n','<br>')}"
+        return f"<h1>{art.title}</h1>{art.text.replace(chr(10),'<br>')}"
     
     except Exception as e:
         log(f"newspaper3k failed for {url}: {e}")
@@ -113,6 +113,12 @@ def upload_to_supernote(pdf_files):
     Upload PDF files to the HackerNews folder on Supernote
     Returns the number of successfully uploaded files
     """
+    test_mode = os.getenv("TEST_MODE", "False").lower() in ("true", "1", "t", "yes")
+    if test_mode:
+        log("TEST MODE: Skipping actual upload to Supernote")
+        log(f"Would have uploaded {len(pdf_files)} files: {', '.join(pdf_files)}")
+        return len(pdf_files)
+        
     email = os.getenv("SUPERNOTE_EMAIL")
     password = os.getenv("SUPERNOTE_PASSWORD")
     dir_id = os.getenv("SUPERNOTE_DIR_ID")
